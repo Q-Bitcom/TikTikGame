@@ -1,14 +1,22 @@
 {
-  "name": "@workspace/scripts",
-  "version": "0.0.0",
-  "private": true,
-  "type": "module",
+  "name": "tic-tac-toe-ai",
+  "version": "1.0.0",
+  "description": "Tic Tac Toe with AI personalities",
+  "main": "server.js",
   "scripts": {
-    "hello": "tsx ./src/hello.ts",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "dotenv": "^16.4.5",
+    "groq-sdk": "^0.3.3"
   },
   "devDependencies": {
-    "@types/node": "catalog:",
-    "tsx": "catalog:"
+    "nodemon": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }
