@@ -1,32 +1,50 @@
-async function checkLogin() {
-    const response = await fetch('/auth-status');
-    const data = await response.json();
+let authMode = 'login'; 
 
-    if (!data.loggedIn) {
-        showLoginScreen();
-    } else {
-        showGameScreen();
+async function checkLogin() {
+    try {
+        const response = await fetch('/auth-status');
+        const data = await response.json();
+        if (!data.loggedIn) {
+            renderAuthScreen(); 
+        } else {
+            showGameScreen(data.username);
+        }
+    } catch (err) {
+        console.error("Connection error:", err);
     }
 }
 
-function showLoginScreen() {
+function renderAuthScreen() {
+    const isLogin = authMode === 'login';
     document.body.innerHTML = `
-        <div id="login-container" style="padding: 50px; text-align: center;">
+        <div style="padding: 50px; text-align: center; font-family: sans-serif;">
             <h1>Tic Tac Toe AI</h1>
-            <h2>Please Log In</h2>
-            <form action="/login" method="POST">
-                <input type="text" name="username" placeholder="Username" required><br><br>
-                <input type="password" name="password" placeholder="Password" required><br><br>
-                <button type="submit">Enter Game</button>
-            </form>
-        </div>
-    `;
+            <div style="border: 1px solid #ccc; padding: 30px; border-radius: 12px; display: inline-block; width: 300px; background: white;">
+                <h2>${isLogin ? 'Log In' : 'Create Account'}</h2>
+                <form action="${isLogin ? '/login' : '/signup'}" method="POST">
+                    <input type="text" name="username" placeholder="Username" style="width: 80%; padding: 10px; margin-bottom: 10px;" required><br>
+                    <input type="password" name="password" placeholder="Password" style="width: 80%; padding: 10px; margin-bottom: 10px;" required><br>
+                    <button type="submit">${isLogin ? 'Enter Game' : 'Register'}</button>
+                </form>
+                <p>${isLogin ? "Need an account?" : "Have an account?"}</p>
+                <button onclick="toggleAuth()">${isLogin ? 'Switch to Sign Up' : 'Switch to Log In'}</button>
+            </div>
+        </div>`;
 }
 
-function showGameScreen() {
-    document.body.innerHTML = `<h1>Welcome to the Game!</h1><div id="grid"></div>`;
-    // Later, you'll put your Tic Tac Toe grid code here!
+function toggleAuth() {
+    authMode = authMode === 'login' ? 'signup' : 'login';
+    renderAuthScreen();
 }
 
-// Run this as soon as the page loads
+function showGameScreen(name) {
+    document.body.innerHTML = `
+        <div style="text-align: center; padding: 50px; font-family: sans-serif;">
+            <h1>Hello, ${name}!</h1>
+            <div id="grid" style="font-size: 24px; margin: 20px;">[ Tic Tac Toe Grid Coming Soon ]</div>
+            <br>
+            <a href="/logout" style="color: red; font-weight: bold; text-decoration: none; border: 1px solid red; padding: 5px 10px; border-radius: 5px;">Logout</a>
+        </div>`;
+}
+
 checkLogin();

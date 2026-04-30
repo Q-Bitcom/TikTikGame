@@ -4,41 +4,56 @@ const path = require('path');
 const app = express();
 const PORT = 3000;
 
-// 1. Give the server a memory (Sessions)
+const users = []; // Temporary database
+
 app.use(session({
     secret: 'tic-tac-toe-secret', 
     resave: false,
     saveUninitialized: true
 }));
 
-// Allow the server to read form data
 app.use(express.urlencoded({ extended: true })); 
-
-// Share the public folder (This automatically loads index.html and main.js!)
 app.use(express.static('public')); 
 
-// 2. THE NEW API: main.js will call this to check if the user is logged in
+// Route: Check if logged in
 app.get('/auth-status', (req, res) => {
     if (req.session.loggedIn) {
-        res.json({ loggedIn: true });
+        res.json({ loggedIn: true, username: req.session.username });
     } else {
         res.json({ loggedIn: false });
     }
 });
 
-// 3. Handle the login form submission from main.js
+// Route: Handle Sign Up
+app.post('/signup', (req, res) => {
+    const { username, password } = req.body;
+    if (users.find(u => u.username === username)) {
+        return res.send('Username taken! <a href="/">Go back</a>');
+    }
+    users.push({ username, password });
+    res.send('Account created! <a href="/">Click here to log in.</a>');
+});
+
+// Route: Handle Login
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
-
-    // Check the password
-    if (username === 'player' && password === '1234') {
+    const user = users.find(u => u.username === username && u.password === password);
+    if (user) {
         req.session.loggedIn = true;
-        res.redirect('/'); // Send them back to index.html, which will now draw the game!
+        req.session.username = username;
+        res.redirect('/');
     } else {
-        res.send('Invalid login. Try player / 1234. <a href="/">Go back</a>');
+        res.send('Invalid login. <a href="/">Go back</a>');
     }
 });
 
+// Route: Handle Logout (THE ONE THAT WAS BREAKING)
+app.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        res.redirect('/'); // Wipe memory and send back to login
+    });
+});
+
 app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`Server spinning up on http://localhost:${PORT}`);
 });
